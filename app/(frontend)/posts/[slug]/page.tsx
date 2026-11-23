@@ -1,4 +1,5 @@
 import { POST_QUERY } from "@/sanity/lib/queries";
+import type { POST_QUERY_RESULT } from "@/sanity/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
@@ -10,10 +11,12 @@ export default async function Page({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { data: post } = await sanityFetch({
-    query: POST_QUERY,
-    params: await params,
-  });
+  const post = (
+    await sanityFetch({
+      query: POST_QUERY,
+      params: await params,
+    })
+  ).data as POST_QUERY_RESULT;
 
   if (!post) {
     notFound();
