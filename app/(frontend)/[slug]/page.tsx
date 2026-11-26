@@ -1,9 +1,9 @@
 import { sanityFetch } from "@/sanity/lib/live";
-import { PAGE_QUERY, PAGES_QUERY } from "@/sanity/lib/queries";
+import { PAGE_QUERY, PAGES_SLUGS_QUERY } from "@/sanity/lib/queries";
 
 export async function generateStaticParams() {
   const { data: pages } = await sanityFetch({
-    query: PAGES_QUERY,
+    query: PAGES_SLUGS_QUERY,
   });
 
   return pages.map((page) => ({
