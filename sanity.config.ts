@@ -28,7 +28,6 @@ export default defineConfig({
     presentationTool({
       resolve,
       previewUrl: {
-        initial: "http://localhost:3000",
         previewMode: {
           enable: "/api/draft-mode/enable",
         },
