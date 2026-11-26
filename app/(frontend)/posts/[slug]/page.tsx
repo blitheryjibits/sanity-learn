@@ -1,7 +1,17 @@
 import { sanityFetch } from "@/sanity/lib/live";
-import { POST_QUERY } from "@/sanity/lib/queries";
+import { POST_QUERY, POSTS_SLUGS_QUERY } from "@/sanity/lib/queries";
 import { notFound } from "next/navigation";
 import { Post } from "@/components/post";
+
+export async function generateStaticParams() {
+  const { data: posts } = await sanityFetch({
+    query: POSTS_SLUGS_QUERY,
+  });
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
 export default async function Page({
   params,
