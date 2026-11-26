@@ -15,13 +15,6 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: sanity/extract.json
-export type AuthorReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "author";
-};
-
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -29,36 +22,67 @@ export type SanityImageAssetReference = {
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
-export type CategoryReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "category";
-};
-
-export type Post = {
-  _id: string;
-  _type: "post";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
+export type SplitImage = {
+  _type: "splitImage";
+  orientation?: "imageLeft" | "imageRight";
   title?: string;
-  slug?: Slug;
-  author?: AuthorReference;
-  mainImage?: {
+  image?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
-    alt?: string;
     _type: "image";
   };
-  categories?: Array<
+};
+
+export type Hero = {
+  _type: "hero";
+  title?: string;
+  text?: BlockContent;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+};
+
+export type Features = {
+  _type: "features";
+  title?: string;
+  features?: Array<{
+    title?: string;
+    text?: string;
+    _type: "feature";
+    _key: string;
+  }>;
+};
+
+export type FaqReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "faq";
+};
+
+export type Faqs = {
+  _type: "faqs";
+  title?: string;
+  faqs?: Array<
     {
       _key: string;
-    } & CategoryReference
+    } & FaqReference
   >;
-  publishedAt?: string;
+};
+
+export type Faq = {
+  _id: string;
+  _type: "faq";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
   body?: BlockContent;
 };
 
@@ -92,6 +116,39 @@ export type BlockContent = Array<
     }
 >;
 
+export type PageBuilder = Array<
+  | ({
+      _key: string;
+    } & Hero)
+  | ({
+      _key: string;
+    } & SplitImage)
+  | ({
+      _key: string;
+    } & Features)
+  | ({
+      _key: string;
+    } & Faqs)
+>;
+
+export type Page = {
+  _id: string;
+  _type: "page";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  content?: PageBuilder;
+  mainImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+};
+
 export type SanityImageCrop = {
   _type: "sanity.imageCrop";
   top: number;
@@ -106,6 +163,64 @@ export type SanityImageHotspot = {
   y: number;
   height: number;
   width: number;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
+export type AuthorReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "author";
+};
+
+export type CategoryReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "category";
+};
+
+export type PostReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "post";
+};
+
+export type Post = {
+  _id: string;
+  _type: "post";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  author?: AuthorReference;
+  mainImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  categories?: Array<
+    {
+      _key: string;
+    } & CategoryReference
+  >;
+  publishedAt?: string;
+  body?: BlockContent;
+  relatedPosts?: Array<
+    {
+      _key: string;
+    } & PostReference
+  >;
 };
 
 export type Author = {
@@ -141,12 +256,6 @@ export type Author = {
     _type: "block";
     _key: string;
   }>;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
 };
 
 export type Category = {
@@ -258,15 +367,24 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | AuthorReference
   | SanityImageAssetReference
-  | CategoryReference
-  | Post
+  | SplitImage
+  | Hero
+  | Features
+  | FaqReference
+  | Faqs
+  | Faq
   | BlockContent
+  | PageBuilder
+  | Page
   | SanityImageCrop
   | SanityImageHotspot
-  | Author
   | Slug
+  | AuthorReference
+  | CategoryReference
+  | PostReference
+  | Post
+  | Author
   | Category
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -279,17 +397,52 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && defined(slug.current)][0...12]{  _id, title, slug}
+// Query: *[_type == "post" && defined(slug.current)]|order(publishedAt desc)[0...12]{  _id,  title,  slug,  body,  mainImage,  publishedAt,  "categories": coalesce(    categories[]->{      _id,      slug,      title    },    []  ),  author->{    name,    image  }}
 export type POSTS_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
   slug: Slug;
+  body: BlockContent | null;
+  mainImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  publishedAt: string | null;
+  categories:
+    | Array<{
+        _id: string;
+        slug: Slug | null;
+        title: string | null;
+      }>
+    | Array<never>;
+  author: {
+    name: string | null;
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    } | null;
+  } | null;
+}>;
+
+// Source: sanity/lib/queries.ts
+// Variable: POSTS_SLUGS_QUERY
+// Query: *[_type == "post" && defined(slug.current)]{  "slug": slug.current}
+export type POSTS_SLUGS_QUERY_RESULT = Array<{
+  slug: string;
 }>;
 
 // Source: sanity/lib/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && slug.current == $slug][0]{  title, body, mainImage}
+// Query: *[_type == "post" && slug.current == $slug][0]{  _id,  title,  body,  mainImage,  publishedAt,  "categories": coalesce(    categories[]->{      _id,      slug,      title    },    []  ),  author->{    name,    image  },  relatedPosts[]{    _key, // required for drag and drop    ...@->{_id, title, slug} // get fields from the referenced post  }}
 export type POST_QUERY_RESULT = {
+  _id: string;
   title: string | null;
   body: BlockContent | null;
   mainImage: {
@@ -300,13 +453,115 @@ export type POST_QUERY_RESULT = {
     alt?: string;
     _type: "image";
   } | null;
+  publishedAt: string | null;
+  categories:
+    | Array<{
+        _id: string;
+        slug: Slug | null;
+        title: string | null;
+      }>
+    | Array<never>;
+  author: {
+    name: string | null;
+    image: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    } | null;
+  } | null;
+  relatedPosts: Array<{
+    _key: string;
+    _id: string;
+    title: string | null;
+    slug: Slug | null;
+  }> | null;
+} | null;
+
+// Source: sanity/lib/queries.ts
+// Variable: PAGE_QUERY
+// Query: *[_type == "page" && slug.current == $slug][0]{  ...,  content[]{    ...,    _type == "faqs" => {      ...,      faqs[]->    }  }}
+export type PAGE_QUERY_RESULT = {
+  _id: string;
+  _type: "page";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  content: Array<
+    | {
+        _key: string;
+        _type: "faqs";
+        title?: string;
+        faqs: Array<{
+          _id: string;
+          _type: "faq";
+          _createdAt: string;
+          _updatedAt: string;
+          _rev: string;
+          title?: string;
+          body?: BlockContent;
+        }> | null;
+      }
+    | {
+        _key: string;
+        _type: "features";
+        title?: string;
+        features?: Array<{
+          title?: string;
+          text?: string;
+          _type: "feature";
+          _key: string;
+        }>;
+      }
+    | {
+        _key: string;
+        _type: "hero";
+        title?: string;
+        text?: BlockContent;
+        image?: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+        };
+      }
+    | {
+        _key: string;
+        _type: "splitImage";
+        orientation?: "imageLeft" | "imageRight";
+        title?: string;
+        image?: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+        };
+      }
+  > | null;
+  mainImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
 } | null;
 
 // Query TypeMap
-import "@sanity/client";
-declare module "@sanity/client" {
+declare global {
   interface SanityQueries {
-    '*[_type == "post" && defined(slug.current)][0...12]{\n  _id, title, slug\n}': POSTS_QUERY_RESULT;
-    '*[_type == "post" && slug.current == $slug][0]{\n  title, body, mainImage\n}': POST_QUERY_RESULT;
+    '*[_type == "post" && defined(slug.current)]|order(publishedAt desc)[0...12]{\n  _id,\n  title,\n  slug,\n  body,\n  mainImage,\n  publishedAt,\n  "categories": coalesce(\n    categories[]->{\n      _id,\n      slug,\n      title\n    },\n    []\n  ),\n  author->{\n    name,\n    image\n  }\n}': POSTS_QUERY_RESULT;
+    '*[_type == "post" && defined(slug.current)]{\n  "slug": slug.current\n}': POSTS_SLUGS_QUERY_RESULT;
+    '*[_type == "post" && slug.current == $slug][0]{\n  _id,\n  title,\n  body,\n  mainImage,\n  publishedAt,\n  "categories": coalesce(\n    categories[]->{\n      _id,\n      slug,\n      title\n    },\n    []\n  ),\n  author->{\n    name,\n    image\n  },\n  relatedPosts[]{\n    _key, // required for drag and drop\n    ...@->{_id, title, slug} // get fields from the referenced post\n  }\n}': POST_QUERY_RESULT;
+    '*[_type == "page" && slug.current == $slug][0]{\n  ...,\n  content[]{\n    ...,\n    _type == "faqs" => {\n      ...,\n      faqs[]->\n    }\n  }\n}': PAGE_QUERY_RESULT;
   }
+}
+// Lets @sanity/client releases that predate the global registry read it too
+declare module "@sanity/client" {
+  interface SanityQueries extends globalThis.SanityQueries {}
 }
