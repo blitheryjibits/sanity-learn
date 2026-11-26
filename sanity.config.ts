@@ -28,6 +28,7 @@ export default defineConfig({
     presentationTool({
       resolve,
       previewUrl: {
+        initial: "https://sanity-learn-eight.vercel.app",
         previewMode: {
           enable: "/api/draft-mode/enable",
         },
