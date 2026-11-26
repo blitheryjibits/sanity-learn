@@ -552,6 +552,13 @@ export type PAGE_QUERY_RESULT = {
   };
 } | null;
 
+// Source: sanity/lib/queries.ts
+// Variable: PAGES_SLUGS_QUERY
+// Query: *[_type == "page" && defined(slug.current)]{    "slug": slug.current  }
+export type PAGES_SLUGS_QUERY_RESULT = Array<{
+  slug: string;
+}>;
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -559,6 +566,7 @@ declare global {
     '*[_type == "post" && defined(slug.current)]{\n  "slug": slug.current\n}': POSTS_SLUGS_QUERY_RESULT;
     '*[_type == "post" && slug.current == $slug][0]{\n  _id,\n  title,\n  body,\n  mainImage,\n  publishedAt,\n  "categories": coalesce(\n    categories[]->{\n      _id,\n      slug,\n      title\n    },\n    []\n  ),\n  author->{\n    name,\n    image\n  },\n  relatedPosts[]{\n    _key, // required for drag and drop\n    ...@->{_id, title, slug} // get fields from the referenced post\n  }\n}': POST_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0]{\n  ...,\n  content[]{\n    ...,\n    _type == "faqs" => {\n      ...,\n      faqs[]->\n    }\n  }\n}': PAGE_QUERY_RESULT;
+    '\n  *[_type == "page" && defined(slug.current)]{\n    "slug": slug.current\n  }\n': PAGES_SLUGS_QUERY_RESULT;
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

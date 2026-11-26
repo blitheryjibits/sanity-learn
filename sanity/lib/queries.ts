@@ -63,3 +63,9 @@ export const PAGE_QUERY =
     }
   }
 }`);
+
+export const PAGES_SLUGS_QUERY = defineQuery(`
+  *[_type == "page" && defined(slug.current)]{
+    "slug": slug.current
+  }
+`);
