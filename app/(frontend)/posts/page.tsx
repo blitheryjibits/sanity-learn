@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { POSTS_QUERY } from "@/sanity/lib/queries";
 import { sanityFetch } from "@/sanity/lib/live";
-import type { POSTS_QUERY_RESULT } from "@/sanity/types";
+import { POSTS_QUERY } from "@/sanity/lib/queries";
 
 export default async function Page() {
-  const posts = (await sanityFetch({ query: POSTS_QUERY }))
-    .data as POSTS_QUERY_RESULT;
+  const { data: posts } = await sanityFetch({ query: POSTS_QUERY });
 
   return (
     <main className="container mx-auto grid grid-cols-1 gap-6 p-12">
