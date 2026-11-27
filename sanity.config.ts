@@ -28,11 +28,15 @@ export default defineConfig({
     presentationTool({
       resolve,
       previewUrl: {
-        initial: "https://sanity-learn-eight.vercel.app",
+        initial: process.env.STUDIO_URL,
         previewMode: {
-          enable: "/api/draft-mode/enable",
+          enable: "./api/draft-mode/enable",
         },
       },
     }),
   ],
+  document: {
+    newDocumentOptions: (prev) =>
+      prev.filter((item) => item.templateId !== "siteSettings"),
+  },
 });

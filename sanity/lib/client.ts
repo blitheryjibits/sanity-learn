@@ -8,5 +8,5 @@ export const client = createClient({
   apiVersion,
   useCdn: false,
 
-  stega: { studioUrl: "https://sanity-learn-eight.vercel.app/studio" },
+  stega: { studioUrl: process.env.STUDIO_URL },
 });

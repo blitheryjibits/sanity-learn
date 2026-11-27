@@ -69,3 +69,16 @@ export const PAGES_SLUGS_QUERY = defineQuery(`
     "slug": slug.current
   }
 `);
+
+export const HOME_PAGE_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
+    homePage->{
+      ...,
+      content[]{
+        ...,
+        _type == "faqs" => {
+          ...,
+          faqs[]->
+        }
+      }
+    }
+  }`);

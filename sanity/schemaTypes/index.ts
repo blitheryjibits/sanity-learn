@@ -10,6 +10,7 @@ import { faqType } from "./faqType";
 import { pageBuilderType } from "./pageBuilderType";
 import { pageType } from "./pageType";
 import { postType } from "./postType";
+import { siteSettingsType } from "./siteSettingsType";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -24,5 +25,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     featuresType,
     heroType,
     splitImageType,
+    siteSettingsType,
   ],
 };
